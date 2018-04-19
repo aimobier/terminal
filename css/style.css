@@ -6,7 +6,7 @@ html, body {
   height: 100%;
   margin: 0;
 }
-body {
+body{
   font-size: 11pt;
   font-family: Inconsolata, monospace;
   color: white;
@@ -76,31 +76,23 @@ body {
   column-width: 100px;
 }
 
-
-/************************************************************/
-/* SVG Clock                                                */
-/************************************************************/
-
-.clock-container {
-  display: none /*inline-block*/;
-  position: relative;
-  width: 200px;
-  vertical-align: middle;
-  overflow: hidden;
-} 
-
-.clock-container > svg > circle {
-  stroke-width: 2px;
-  stroke: #fff;
-}
-
-.hour, .min, .sec { 
-  stroke-width: 1px;
-  fill: #333;
-  stroke: #555;
+pre {
+  color: #99CC33;
+  font-family: Inconsolata, monospace;
 }
 
 .sec {
    stroke: #f55;
 }
 
+.success{
+  color: #99CC33;
+}
+
+.warning{
+  color: #FF9966;
+}
+
+.error{
+  color: #FF6666;
+}

@@ -1,22 +1,16 @@
 $(function() {
 
+
+  var { Query, User } = AV;
+  AV.init("Nzr6uILxRVGe2jgpykgH1fyg-gzGzoHsz", "nTBkk57i7SYrn2OUEP1mn78Y");
+
   // Set the command-line prompt to include the user's IP Address
   // $('.prompt').html('[' + codehelper_ip["IP"] + '@HTML5] # ');
-    $('.prompt').html('[user@HTML5] # ');
+  $('.prompt').html('[loading user...@HTML5] # ');
 
   // Initialize a new terminal object
   var term = new Terminal('#input-line .cmdline', '#container output');
-  term.init();
 
-  // Update the clock every second
-  setInterval(function() {
-    function r(cls, deg) {
-      $('.' + cls).attr('transform', 'rotate('+ deg +' 50 50)')
-    }
-    var d = new Date()
-    r("sec", 6*d.getSeconds())
-    r("min", 6*d.getMinutes())
-    r("hour", 30*(d.getHours()%12) + d.getMinutes()/2)
-  }, 1000);
-
+  const terminaluser = new TerminalUser(term);
+  terminaluser.getUser();
 });
