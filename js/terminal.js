@@ -206,24 +206,9 @@ class Terminal {
         }
     }
 
-    //
-    formatColumns_(entries) {
-        var maxName = entries[0].name;
-        util.toArray(entries).forEach(function (entry, i) {
-            if (entry.name.length > maxName.length) {
-                maxName = entry.name;
-            }
-        });
 
-        var height = entries.length <= 3 ?
-        'height: ' + (entries.length * 15) + 'px;' : '';
 
-        // 12px monospace font yields ~7px screen width.
-        var colWidth = maxName.length * 7;
 
-        return ['<div class="ls-files" style="-webkit-column-width:',
-            colWidth, 'px;', height, '">'];
-    }
 
     //
     output(html, cls) {
