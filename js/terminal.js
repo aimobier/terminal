@@ -268,6 +268,9 @@ is login:   Is the user currently linked to the dist and can chat<br>\
 
     /// 处理请求到用户
     handleuser(user) {
+        if (!this.chatroom) {
+            this.chatroom = new ChatRoom(this, user);
+        }
         this.currentuser = user;
         const uid = user.get(USER_IDENTIFIER);
         const uname = user.get(USER_USERNAME);
