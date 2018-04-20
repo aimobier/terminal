@@ -21,14 +21,6 @@ class Terminal {
             'cat', 'clear', 'date', 'echo', 'help', 'uname', 'whoami'
         ];
 
-        this.initHtmlElment =
-            '<img align="left" src="http://www.w3.org/html/logo/downloads/HTML5_Badge_128.png" ' +
-            'width="100" height="100" style="padding: 0px 10px 20px 0px">' +
-            '<h2 style="letter-spacing: 4px">HTML5 Web Terminal</h2>' +
-            '<p>' + new Date() + '</p>' +
-            '<p>Enter "help" for more information.</p><br><hr/>';
-
-
         window.URL = window.URL || window.webkitURL;
         window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
@@ -38,13 +30,22 @@ class Terminal {
         this.cmdLine_.addEventListener('click', this.inputTextClick_.bind(this), false);
         this.cmdLine_.addEventListener('keydown', this.historyHandler_.bind(this), false);
         this.cmdLine_.addEventListener('keydown', this.processNewCommand_.bind(this), false);
-
-        this.output(this.initHtmlElment);
+        this.init();
     }
 
     //
     inputTextClick_(e) {
         this.cmdLine_.value = this.cmdLine_.value;
+
+    init(){
+
+        this.initHtmlElment =
+            '<img align="left" src="http://www.w3.org/html/logo/downloads/HTML5_Badge_128.png" ' +
+            'width="100" height="100" style="padding: 0px 10px 20px 0px">' +
+            '<h2 style="letter-spacing: 4px">HTML5 Web Terminal</h2>' +
+            '<p>' + new Date() + '</p>' +
+            '<p>Enter "help" for more information.</p><br><hr/>';
+        this.output(this.initHtmlElment);
     }
 
     //
