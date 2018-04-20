@@ -1,12 +1,14 @@
-var util = util || {};
-util.toArray = function (list) {
-    return Array.prototype.slice.call(list || [], 0);
-};
-
-// 存储服务
-
+/**
+ * 终端类型
+ */
 class Terminal {
 
+    /**
+     * 初始化一个终端
+     *
+     * @param cmdLineContainer 输入的选择
+     * @param outputContainer 输出的选择
+     */
     constructor(cmdLineContainer, outputContainer) {
 
         this.history_ = [];
@@ -25,14 +27,20 @@ class Terminal {
         this.enginemethod_();
     }
 
-    /// 处理请求到用户
+    /**
+     * 处理用户 当用户完成更新
+     * 处理用户完成一些基本的操作
+     * 例如 是否登陆 是否注册 等值的断定
+     *
+     * @param user
+     */
     handleuser(user) {
         if (!this.chatroom) {
             this.chatroom = new ChatRoom(this, user);
         }
         this.currentuser = user;
-        const uid = user.get(USER_IDENTIFIER);
-        const uname = user.get(USER_USERNAME);
+        const uid = user.get(TerminalUser.USER_IDENTIFIER);
+        const uname = user.get(TerminalUser.USER_USERNAME);
         if (!uname) {
             $('.prompt').html('[' + uid + '@HTML5] # ');
             this.outwarning("u don's have name, input 'uname [name]' to set/update name <br> example: uname aimobier");
@@ -42,20 +50,38 @@ class Terminal {
     }
 
 
-//    打印方法
-
+    /**
+     * 输出 html
+     *
+     * @param html
+     */
     output(html) {
         this.output_.insertAdjacentHTML('beforeEnd', '<p>' + html + '</p>');
     }
 
+    /**
+     * 以失败的样式 输出 html
+     *
+     * @param html
+     */
     outerror(html) {
         this.output_.insertAdjacentHTML('beforeEnd', '<p class="error">' + html + '</p>');
     }
 
+    /**
+     * 以注意的样式 输出 html
+     *
+     * @param html
+     */
     outwarning(html) {
         this.output_.insertAdjacentHTML('beforeEnd', '<p class="warning">' + html + '</p>');
     }
 
+    /**
+     * 以成功的样式 输出 html
+     *
+     * @param html
+     */
     outsuccess(html) {
         this.output_.insertAdjacentHTML('beforeEnd', '<p class="success">' + html + '</p>');
     }
@@ -78,35 +104,29 @@ class Terminal {
      */
     enginemethod_() {
 
-        this.initHtmlElment =
+        this.initHtmlElment_ =
             '<img align="left" src="http://www.w3.org/html/logo/downloads/HTML5_Badge_128.png" ' +
             'width="100" height="100" style="padding: 0px 10px 20px 0px">' +
             '<h2 style="letter-spacing: 4px">HTML5 Web Terminal</h2>' +
             '<p>' + new Date() + '</p>' +
             '<p>Enter "help" for more information.</p><br><hr/>';
-        this.output(this.initHtmlElment);
+        this.output(this.initHtmlElment_);
 
         this.CMDS_ = {
             user: {
                 help: "<span style='color: #FF9966;font-size: 1.1em;'>user</span><br><br>\
                     Include login, set password, set user name, view user's current state and other user related operations.<br>\
-                You can personalize your users here. This is your first step in using this application.<br>\
+                    You can personalize your users here. This is your first step in using this application.<br>\
                     <br>\
                     <span style='color: #FF9966'>-s</span> displays a table about current user related information.<br>\
                     <span style='color: #FF9966'>-n [name]</span> setting the user's user nickname，ps: nicknames do not contain parentheses.<br>\
                     <span style='color: #FF9966'>-h</span> all command documents that display the operation.<br>\
                     ",
                 handle: (args, cmd) => {
-
                     if (args[0] === "-s") {
                         this.terminal_user_s_();
                     } else if (args[0] === "-n" && args[1] != undefined) {
-                        this.currentuser.set(USER_USERNAME, args[1]);
-                        this.currentuser.save().then(user => {
-                            this.handleuser(user);
-                        }, error => {
-                            this.outerror(error.toString());
-                        });
+                        this.terminal_user_n_(args);
                     } else {
                         this.output(cmd.help);
                     }
@@ -256,6 +276,21 @@ class Terminal {
         }
     }
 
+    /**
+     * 获取当前页面的高度
+     * 和滑动方法一起使用完成 命令过多时 自动向下
+     *
+     * @returns {number} 当前的页面的高度
+     * @private
+     */
+    getDocHeight_() {
+        var d = document;
+        return Math.max(
+            Math.max(d.body.scrollHeight, d.documentElement.scrollHeight),
+            Math.max(d.body.offsetHeight, d.documentElement.offsetHeight),
+            Math.max(d.body.clientHeight, d.documentElement.clientHeight)
+        );
+    }
 
     /**
      * 展示 当前 所有的CMD 以及他们的帮助信息
@@ -275,23 +310,6 @@ class Terminal {
         this.output(helpStr);
     }
 
-
-    /**
-     * 获取当前页面的高度
-     * 和滑动方法一起使用完成 命令过多时 自动向下
-     *
-     * @returns {number} 当前的页面的高度
-     * @private
-     */
-    getDocHeight_() {
-        var d = document;
-        return Math.max(
-            Math.max(d.body.scrollHeight, d.documentElement.scrollHeight),
-            Math.max(d.body.offsetHeight, d.documentElement.offsetHeight),
-            Math.max(d.body.clientHeight, d.documentElement.clientHeight)
-        );
-    }
-
     /**
      * 终端 user -s 命令的处理方法
      *
@@ -305,7 +323,7 @@ class Terminal {
             return (((1 + Math.random()) * 0x1000000) | 0).toString(16).substring(1);
         }
 
-        const uname = this.currentuser.get(USER_USERNAME);
+        const uname = this.currentuser.get(TerminalUser.USER_USERNAME);
 
         const elmentId = S4();
 
@@ -320,7 +338,7 @@ class Terminal {
         <tr>\
         <td>' + (uname ? uname : "not set") + '</td>\
         <td>' + this.currentuser.id + '</td>\
-        <td>' + (this.currentuser.get(USER_ISEASEMOBUSER) == true) + '</td>\
+        <td>' + (this.currentuser.get(TerminalUser.USER_ISEASEMOBUSER) == true) + '</td>\
         <td>' + (this.islogin == true) + '</td>\
         </tr>\
         </table>\
@@ -342,6 +360,21 @@ is login:   Is the user currently linked to the dist and can chat<br>\
             } else {
                 divEl.hide(300);
             }
+        });
+    }
+
+    /**
+     * 终端 user -n 命令处理方法
+     * 修改用户的名称
+     *
+     * @private
+     */
+    terminal_user_n_(args){
+        this.currentuser.set(TerminalUser.USER_USERNAME, args[1]);
+        this.currentuser.save().then(user => {
+            this.handleuser(user);
+        }, error => {
+            this.outerror(error.toString());
         });
     }
 }
@@ -380,30 +413,19 @@ class ChatRoom {
             onOffline: () => term.output("status change -> offLine", "error"), //本机网络掉线
             onError: () => term.output(message, "error") // 任何错误
         });
+
+        var options = {
+            username: 'aimobier',
+            password: '123456',
+            nickname: 'nickname',
+            appKey: WebIM.config.appkey,
+            success: function () { console.log("success") },
+            error: function () { console.log("error") },
+            apiUrl: WebIM.config.apiURL
+        };
+        this.conn.registerUser(options);
     }
 }
-
-
-/**
- * 用户的Classname
- * 保存在 LeanCloud 中时，需要存储到的Class
- */
-const USERCLASSNAME = "Terminal_user";
-
-/**
- * 用户的唯一标示字段
- */
-const USER_IDENTIFIER = "terminal_identifier";
-
-/**
- * 用户的 名称
- */
-const USER_USERNAME = "terminal_username";
-
-/**
- * 用户的是否注册了环信
- */
-const USER_ISEASEMOBUSER = "terminal_iseasemobuser";
 
 /**
  *  终端用户对象
@@ -412,6 +434,27 @@ const USER_ISEASEMOBUSER = "terminal_iseasemobuser";
  *  并且该值 不会因为重启电脑而失效
  */
 class TerminalUser {
+
+    /**
+     * 用户的Classname
+     * 保存在 LeanCloud 中时，需要存储到的Class
+     */
+    static get USERCLASSNAME() { return "Terminal_user" };
+
+    /**
+     * 用户的唯一标示字段
+     */
+    static get USER_IDENTIFIER() { return "terminal_identifier" };
+
+    /**
+     * 用户的 名称
+     */
+    static get USER_USERNAME() { return "terminal_username" };
+
+    /**
+     * 用户的是否注册了环信
+     */
+    static get USER_ISEASEMOBUSER() { return "terminal_iseasemobuser" };
 
     /**
      * 初始化方法 完成对于 用户对象的构建
@@ -448,8 +491,8 @@ class TerminalUser {
      * @param token 用户的唯一标示
      */
     getUserByFinger_(token) {
-        var query = new AV.Query(USERCLASSNAME);
-        query.equalTo(USER_IDENTIFIER, token);
+        var query = new AV.Query(TerminalUser.USERCLASSNAME);
+        query.equalTo(TerminalUser.USER_IDENTIFIER, token);
         query.find().then(results => {
             if (results.length <= 0) { // 没有找到
                 this.createUser_(token);
@@ -470,9 +513,9 @@ class TerminalUser {
      * @param token 用户唯一标示
      */
     createUser_(token) {
-        var TerminalUser = AV.Object.extend(USERCLASSNAME);
+        var TerminalUser = AV.Object.extend(TerminalUser.USERCLASSNAME);
         var tUser = new TerminalUser();
-        tUser.set(USER_IDENTIFIER, token);
+        tUser.set(TerminalUser.USER_IDENTIFIER, token);
         tUser.save().then(user => {
             this.terminal.handleuser(user);
         }, error => {
