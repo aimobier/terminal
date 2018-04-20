@@ -209,4 +209,42 @@ class Terminal {
             $('.prompt').html('[' + uname + '@HTML5] # ');
         }
     }
+
+/**
+ * 聊天室
+ *
+ * 主要功能用来链接环信 进行一些基本的操作的操作
+ */
+class ChatRoom{
+
+    constructor(term) {
+
+        this.conn = new WebIM.connection({
+            isMultiLoginSessions: WebIM.config.isMultiLoginSessions,
+            https: typeof WebIM.config.https === 'boolean' ? WebIM.config.https : location.protocol === 'https:',
+            url: WebIM.config.xmppURL,
+            heartBeatWait: WebIM.config.heartBeatWait,
+            autoReconnectNumMax: WebIM.config.autoReconnectNumMax,
+            autoReconnectInterval: WebIM.config.autoReconnectInterval,
+            apiUrl: WebIM.config.apiURL,
+            isAutoLogin: true
+        });
+
+        /// 监听链接消息
+        this.conn.listen({
+            onTextMessage: function ( message ) {
+                const mess = "<p>"+message.from+"   <span style='color: #96b38a'>"+(new Date())+"</span></p>" +
+                    "<p style='color: #FF9966'>"+message.sourceMsg+"</p><hr>";
+                term.output(mess,"success");
+            },    //收到文本消息
+            onOpened: () => term.output("connection success!!!!!","success"), //连接成功回调
+            onClosed: () => term.output("connection fail!!!!!","warning"), //连接失败回调
+            onOnline: () => term.output("status change -> onLine","success") ,//本机网络连接成功
+            onOffline: () => term.output("status change -> offLine","error"), //本机网络掉线
+            onError: () => term.output(message,"error") // 任何错误
+        });
+    }
+}
+
+
 }
