@@ -96,3 +96,8 @@ pre {
 .error{
   color: #FF6666;
 }
+
+
+table,table tr th, table tr td { border:1px solid white; }
+table{border-collapse:collapse;}
+table tr th, table tr td { padding: 8px; }
