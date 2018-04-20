@@ -247,4 +247,99 @@ class ChatRoom{
 }
 
 
+/**
+ * 用户的Classname
+ * 保存在 LeanCloud 中时，需要存储到的Class
+ */
+const USERCLASSNAME = "Terminal_user";
+
+/**
+ * 用户的唯一标示字段
+ */
+const USER_IDENTIFIER = "terminal_identifier";
+
+/**
+ * 用户的 名称
+ */
+const USER_USERNAME = "terminal_username";
+
+/**
+ * 用户的是否注册了环信
+ */
+const USER_ISEASEMOBUSER = "terminal_iseasemobuser";
+
+/**
+ *  终端用户对象
+ *
+ *  默认一个浏览器中只存在一个终端用户
+ *  并且该值 不会因为重启电脑而失效
+ */
+class TerminalUser {
+
+    /**
+     * 初始化方法 完成对于 用户对象的构建
+     * 传入 terminal 对象是为了 在 终端中打印一些需要打印的数据
+     *
+     * @param terminal 终端对象
+     */
+    constructor(terminal) {
+        this.terminal = terminal;
+    }
+
+    /**
+     * 获取用户
+     *
+     * 首先从数据库中获取，没有就创建
+     * 之后根据环信相关，填充相关信息 包裹 是否注册 是否登陆等
+     */
+    async getUser() {
+        var fingerprint = function (resolve) {
+            new Fingerprint2().get(function (result) {
+                resolve(result)
+            });
+        }.bind(this);
+
+        this.getUserByFinger(await new Promise(fingerprint));
+    }
+
+    /**
+     * 根据 提供的token 去获取用户
+     *
+     * 获取到 交给 terminal 处理
+     * 没有获取到 创建一个用户 并交给 terminal 处理
+     *
+     * @param token 用户的唯一标示
+     */
+    getUserByFinger(token){
+        var query = new AV.Query(USERCLASSNAME);
+        query.equalTo(USER_IDENTIFIER,token);
+        query.find().then(results => {
+            if (results.length <= 0){ // 没有找到
+                this.createUser(token);
+            }else{ // 保存该用户
+                this.terminal.handleuser(results[0]);
+            }
+        },error => {
+            this.terminal.outerror(error.toString());
+        });
+    }
+
+    /**
+     * 根据用户的 token 创建一个用户
+     *
+     *  创建成功 交给 terminal 处理
+     *  创建失败 打印 创建失败 详细信息
+     *
+     * @param token 用户唯一标示
+     */
+    createUser(token){
+        var TerminalUser = AV.Object.extend(USERCLASSNAME);
+        var tUser = new TerminalUser();
+        tUser.set(USER_IDENTIFIER,token);
+        tUser.save().then(user => {
+            this.terminal.handleuser(user);
+        },error => {
+            this.terminal.outerror(error.toString());
+        });
+    }
 }
