@@ -17,9 +17,86 @@ class Terminal {
         this.cmdLine_ = document.querySelector(cmdLineContainer);
         this.output_ = document.querySelector(outputContainer);
 
-        this.CMDS_ = [
-            'cat', 'clear', 'date', 'echo', 'help', 'uname', 'whoami'
-        ];
+        // this.CMDS_ = [
+        //     'cat', 'clear', 'date', 'echo', 'help', 'uname', 'whoami', 'setpass','status'
+        // ];
+
+        this.CMDS_ = {
+            user: {
+                help:
+                "<span style='color: #FF9966;font-size: 1.1em;'>user</span><br><br>\
+                    Include login, set password, set user name, view user's current state and other user related operations.<br>\
+                You can personalize your users here. This is your first step in using this application.<br>\
+                    <br>\
+                    <span style='color: #FF9966'>-s</span> displays a table about current user related information.<br>\
+                    <span style='color: #FF9966'>-n [name]</span> setting the user's user nickname，ps: nicknames do not contain parentheses.<br>\
+                    <span style='color: #FF9966'>-h</span> all command documents that display the operation.<br>\
+                    ",
+                handle: ( args,cmd ) => {
+
+                    if (args[0] === "-s"){
+                        this.getCurrentStatus();
+                    }else if (args[0] === "-n" && args[1] != undefined){
+                        this.currentuser.set(USER_USERNAME, args[1]);
+                        this.currentuser.save().then(user => {
+                            this.handleuser(user);
+                        }, error => {
+                            this.outerror(error.toString());
+                        });
+                    }else{
+                        this.output(cmd.help);
+                    }
+                }
+            },
+            clear: {
+                help:
+                    "<span style='color: #FF9966;font-size: 1.1em;'>clear</span><br><br>\
+                        Empty the current terminal to display all contents to facilitate users to access content. \
+                        ps: that the content after cleaning is not recoverable<br>\
+                        <span style='color: #FF9966'>-h</span> all command documents that display the operation.<br>\
+                        ",
+                handle: () => {
+                    this.output_.innerHTML = '';
+                    this.cmdLine_.value = '';
+                }
+            },
+            date: {
+                help:
+                    "<span style='color: #FF9966;font-size: 1.1em;'>date</span><br><br>\
+                        It's a boring operation to show the current time. I like it, it doesn't matter<br>\
+                        <span style='color: #FF9966'>-f [fromatstring]</span> Formatted presentation of the current time.<br>\
+                        <span style='color: #FF9966'>-h</span> all command documents that display the operation.<br>\
+                        ",
+                handle: (args) => {
+                    this.output(dateFormat(new Date(),args[1]));
+                }
+            },
+            echo: {
+                help:
+                    "<span style='color: #FF9966;font-size: 1.1em;'>echo</span><br><br>\
+                        This command is used for the output of strings. There is no egg. <br>\
+                        <span style='color: #FF9966'>-s [string]</span> Print the string of the successful style.<br>\
+                        <span style='color: #FF9966'>-w [string]</span> Print the string of the warnings style.<br>\
+                        <span style='color: #FF9966'>-e [string]</span> Print the string of the error style.<br>\
+                        <span style='color: #FF9966'>-h [string]</span> all command documents that display the operation.<br>\
+                        ",
+                handle: (args) => {
+                    if (args[1] != undefined){
+                        if (args[0] === "-s"){
+                            this.outsuccess(args[1]);
+                        }else if (args[0] === "-w"){
+                            this.outwarning(args[1]);
+                        }else if (args[0] === "-e"){
+                            this.outerror(args[1]);
+                        }else{
+                            this.output(args.join(""));
+                        }
+                    }else{
+                        this.output(args.join(""));
+                    }
+                }
+            },
+        };
 
         window.URL = window.URL || window.webkitURL;
         window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
@@ -108,55 +185,20 @@ class Terminal {
                 args = args.splice(1); // Remove cmd from arg list.
             }
 
-            switch (cmd) {
-                case 'cat':
-                    var url = args.join(' ');
-                    if (!url) {
-                        this.output('Usage: ' + cmd + ' https://s.codepen.io/...');
-                        this.output('Example: ' + cmd + ' https://s.codepen.io/AndrewBarfield/pen/LEbPJx.js');
-                        break;
-                    }
-                    $.get(url, function (data) {
-                        var encodedStr = data.replace(/[\u00A0-\u9999<>\&]/gim, function (i) {
-                            return '&#' + i.charCodeAt(0) + ';';
-                        });
-                        this.output('<pre>' + encodedStr + '</pre>');
-                    });
-                    break;
-                case 'clear':
-                    output_.innerHTML = '';
-                    this.cmdLine_.value = '';
+            const cmdobj = this.CMDS_[cmd];
+
+            if (cmdobj != undefined){
+                if (args[0] === "-h"){
+                    this.output(cmdobj.help);
+                }else{
+                    cmdobj.handle(args,cmdobj);
+                }
+            }else{
+                if (cmd === "help") {
+                    this.terminal_help();
                     return;
-                case 'date':
-                    this.output(new Date());
-                    break;
-                case 'echo':
-                    this.output(args.join(' '));
-                    break;
-                case 'help':
-                    this.output('<div class="ls-files">' + this.CMDS_.join('<br>') + '</div>');
-                    break;
-                case 'uname':
-                    if (args.length == 1) {
-
-                        this.currentuser.set(USER_USERNAME, args[0]);
-                        this.currentuser.save().then(user => {
-                            this.handleuser(user);
-                        }, error => {
-                            this.output(error.toString(), "error");
-                        });
-
-                    } else {
-                        this.output(this.currentuser.get(USER_USERNAME));
-                    }
-                    break;
-                case 'whoami':
-                    this.output("<pre>"+JSON.stringify(this.currentuser,null,2)+"</pre>");
-                    break;
-                default:
-                    if (cmd) {
-                        this.output(cmd + ': command not found',"warning");
-                    }
+                }
+                this.outwarning(cmd + ': command not found', "warning");
             }
 
             window.scrollTo(0, this.getDocHeight_());
