@@ -202,8 +202,15 @@ class Terminal {
     }
 
 
+    terminal_help(){
 
+        var helpStr = "";
 
+        for (var key in this.CMDS_){
+            helpStr += "<div style='font-size: 1em;'>";
+            helpStr += this.CMDS_[key].help+"<br>";
+            helpStr += "<br><br></div>";
+        }
 
         this.output(helpStr);
     }
