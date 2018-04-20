@@ -101,18 +101,13 @@ class Terminal {
         window.URL = window.URL || window.webkitURL;
         window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
-
         window.addEventListener('click', e => this.cmdLine_.focus(), false);
-
-        this.cmdLine_.addEventListener('click', this.inputTextClick_.bind(this), false);
+        this.cmdLine_.addEventListener('click', ()=> this.cmdLine_.value = this.cmdLine_.value, false);
         this.cmdLine_.addEventListener('keydown', this.historyHandler_.bind(this), false);
         this.cmdLine_.addEventListener('keydown', this.processNewCommand_.bind(this), false);
         this.init();
     }
 
-    //
-    inputTextClick_(e) {
-        this.cmdLine_.value = this.cmdLine_.value;
 
     init(){
 
