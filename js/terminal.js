@@ -210,10 +210,9 @@ class Terminal {
 
 
 
-    //
-    output(html, cls) {
-        this.output_.insertAdjacentHTML('beforeEnd', '<p class=' + cls + '>' + html + '</p>');
+        this.output(helpStr);
     }
+
 
     // Cross-browser impl to get document's height.
     getDocHeight_() {
@@ -232,11 +231,32 @@ class Terminal {
         const uname = user.get(USER_USERNAME);
         if (!uname) {
             $('.prompt').html('[' + uid + '@HTML5] # ');
-            this.output("u don's have name, input 'uname [name]' to set/update name <br> example: uname aimobier", "warning");
+            this.outwarning("u don's have name, input 'uname [name]' to set/update name <br> example: uname aimobier");
         } else {
             $('.prompt').html('[' + uname + '@HTML5] # ');
         }
     }
+
+
+//    打印方法
+
+    output(html) {
+        this.output_.insertAdjacentHTML('beforeEnd', '<p>' + html + '</p>');
+    }
+
+    outerror(html) {
+        this.output_.insertAdjacentHTML('beforeEnd', '<p class="error">' + html + '</p>');
+    }
+
+    outwarning(html) {
+        this.output_.insertAdjacentHTML('beforeEnd', '<p class="warning">' + html + '</p>');
+    }
+
+    outsuccess(html) {
+        this.output_.insertAdjacentHTML('beforeEnd', '<p class="success">' + html + '</p>');
+    }
+}
+
 
 /**
  * 聊天室
