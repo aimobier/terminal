@@ -35,7 +35,7 @@ class Terminal {
                 handle: ( args,cmd ) => {
 
                     if (args[0] === "-s"){
-                        this.getCurrentStatus();
+                        this.terminal_user_s();
                     }else if (args[0] === "-n" && args[1] != undefined){
                         this.currentuser.set(USER_USERNAME, args[1]);
                         this.currentuser.save().then(user => {
@@ -217,6 +217,53 @@ class Terminal {
             Math.max(d.body.offsetHeight, d.documentElement.offsetHeight),
             Math.max(d.body.clientHeight, d.documentElement.clientHeight)
         );
+    }
+
+
+    terminal_user_s() {
+
+        function S4() {
+            return (((1+Math.random())*0x1000000)|0).toString(16).substring(1);
+        }
+
+        const uname = this.currentuser.get(USER_USERNAME);
+
+        const elmentId = S4();
+
+        const tab = '\
+        <table border="1"> \
+        <tr>\
+        <th>uname</th>\
+        <th>uid</th>\
+        <th>is regist</th>\
+        <th>is login</th>\
+        </tr>\
+        <tr>\
+        <td>'+(uname ? uname : "not set")+'</td>\
+        <td>'+this.currentuser.id+'</td>\
+        <td>'+(this.currentuser.get(USER_ISEASEMOBUSER) == true)+'</td>\
+        <td>'+(this.islogin == true)+'</td>\
+        </tr>\
+        </table>\
+        <p id="'+elmentId+'">click this to show/hidden more help for table title.</p>\
+        <pre id="'+elmentId+'-content"  style="color: brown">\
+uname:      The name of the current user.<br>\
+uid:        The unique indication of the current user<br>\
+is regist:  Is the current user registered to a dist<br>\
+is login:   Is the user currently linked to the dist and can chat<br>\
+        </pre>\
+        ';
+        this.output(tab);
+        const divEl = $("#"+elmentId+"-content");
+        divEl.hide();
+        $("#"+elmentId).click(()=>{
+            if(divEl.is(":hidden")){
+                divEl.show();
+                window.scrollTo(0, this.getDocHeight_());
+            }else{
+                divEl.hide(300);
+            }
+        });
     }
 
     /// 处理请求到用户
